@@ -68,9 +68,10 @@ API disponible sur <http://localhost>.
 docker compose -f compose.yml -f compose.dev.yml exec app php artisan test
 ```
 
-Les tests s'exécutent sur **SQLite en mémoire** (`phpunit.xml`) avec
-`RefreshDatabase` : aucune base externe n'est nécessaire, et la suite est
-rejouable sans effet de bord.
+Les tests s'exécutent sur **MariaDB**, le même moteur qu'en production, avec
+`RefreshDatabase` : les migrations sont rejouées à chaque test, sans effet de
+bord. Les identifiants de la base de test viennent de `api/src/.env.testing`
+(non versionné, un exemple est fourni).
 
 ## Documentation de l'API
 
