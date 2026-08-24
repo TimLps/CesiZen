@@ -1,10 +1,17 @@
+# Dépendances : réinstallées dans l'image par composer install.
 src/vendor
 src/node_modules
-src/storage/logs
-src/storage/framework/cache
-src/storage/framework/sessions
-src/storage/framework/views
+
+# Secrets : la configuration de production passe par des variables
+# d'environnement, jamais par un fichier .env embarqué dans l'image.
 src/.env
 src/.env.*
+
+# Artefacts locaux
 src/.phpunit.cache
 src/.phpunit.result.cache
+src/storage/logs/*.log
+src/storage/api-docs/*.json
+
+# Le squelette storage/ et bootstrap/cache doit rester dans le contexte de
+# build : Laravel ne démarre pas si ces dossiers n'existent pas dans l'image.

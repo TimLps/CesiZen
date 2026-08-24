@@ -34,6 +34,11 @@ FROM base AS prod
 COPY src/ /var/www/html/
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
+    && mkdir -p storage/framework/cache/data \
+                storage/framework/sessions \
+                storage/framework/views \
+                storage/logs \
+                bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
 CMD ["php-fpm"]
