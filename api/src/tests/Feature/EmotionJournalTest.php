@@ -117,6 +117,11 @@ class EmotionJournalTest extends TestCase
             'entry_date' => now()->toDateString(),
         ]);
 
+        // Le guard a mémorisé "Autre" lors de la requête précédente ; sans cet
+        // appel, la requête suivante resterait authentifiée en tant qu'Autre et
+        // le test ne vérifierait rien. Voir Tests\TestCase.
+        $this->forgetAuthenticatedUser();
+
         $response = $this->withHeaders($this->authHeader())->getJson('/api/journal');
 
         $response->assertOk();
