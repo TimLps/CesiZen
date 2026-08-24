@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: cesizen_app
+    working_dir: /var/www
+    volumes:
+      - ./src:/var/www
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    networks:
+      - cesizen_net
+
+  db:
+    image: mariadb:11
+    container_name: cesizen_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cesizen
+      MYSQL_USER: cesizen
+      MYSQL_PASSWORD: cesizen
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - cesizen_net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: cesizen_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8081:80"
+    networks:
+      - cesizen_net
+
+volumes:
+  dbdata:
+
+networks:
+  cesizen_net:
+    driver: bridge

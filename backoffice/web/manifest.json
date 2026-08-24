@@ -1,0 +1,8 @@
+{
+  "name": "CESIZen Admin",
+  "short_name": "CESIZen Admin",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F6FAFB",
+  "theme_color": "#80B8C0"
+}
