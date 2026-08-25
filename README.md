@@ -1,5 +1,8 @@
 # CESIZen — Projet d'évaluation CDA
 
+[![CI](https://github.com/TimLps/CesiZen/actions/workflows/ci.yml/badge.svg)](https://github.com/TimLps/CesiZen/actions/workflows/ci.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=TimLps_CesiZen&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=TimLps_CesiZen)
+
 Application de **santé mentale grand public** réalisée dans le cadre du titre **Concepteur Développeur d'Applications**.
 
 > CESIZen propose à ses utilisateurs un espace pour mieux comprendre leur santé mentale, suivre leurs émotions au quotidien et apprendre à gérer leur stress via des exercices guidés de cohérence cardiaque.
@@ -39,6 +42,10 @@ Dans le dossier `docs/` :
 | **`INSTALLATION.md`** | Guide d'installation pas à pas des 3 sous-projets |
 | **`CESIZen_Choix_Techniques.pdf`** | Comparatif d'architectures + justification du choix Laravel + Flutter |
 | **`CESIZen_Cahier_de_Tests.pdf`** | Stratégie de test, scénarios unitaires/fonctionnels/recette + PV de recette |
+
+Le fichier [`SECURITE.md`](SECURITE.md) à la racine recense les failles
+identifiées, les corrections apportées et la justification des valeurs
+retenues.
 
 ---
 
