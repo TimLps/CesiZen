@@ -21,6 +21,11 @@ Cible : navigateur desktop (Chrome, Firefox, Edge, Safari).
 - Flutter SDK 3.5+ avec support Web activé
 - API CESIZen accessible sur `http://localhost:8001`
 
+> Le back-office doit démarrer sur le **port 3000** : c'est l'origine
+> déclarée dans `api/src/config/cors.php`. Sans `--web-port=3000`, Flutter
+> choisit un port au hasard et le navigateur bloque tous les appels à
+> l'API au titre de la politique CORS.
+
 ```bash
 # Vérifier que le support Web est actif
 flutter config --enable-web
@@ -32,7 +37,7 @@ flutter devices  # Chrome doit apparaître
 ```bash
 cd backoffice
 flutter pub get
-flutter run -d chrome
+flutter run -d chrome --web-port=3000
 ```
 
 L'application s'ouvre dans Chrome avec hot-reload activé.
