@@ -2,7 +2,12 @@
     "name": "cesi/cesizen-api",
     "type": "project",
     "description": "API Laravel pour l'application CESIZen — Santé mentale & gestion du stress",
-    "keywords": ["laravel", "cesizen", "api", "sante-mentale"],
+    "keywords": [
+        "laravel",
+        "cesizen",
+        "api",
+        "sante-mentale"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
@@ -51,6 +56,14 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": {
+                "PKSA-3r5d-mb8f-1qw9": "Injection CRLF dans la regle de validation email. Corrigee a partir de Laravel 12.60.0 : inatteignable sur la branche 11 declaree par ce projet. Montee de version majeure arbitree hors delai, tracee dans SECURITE.md.",
+                "PKSA-mdq4-51ck-6kdq": "Meme vulnerabilite que PKSA-3r5d-mb8f-1qw9, referencee cote CVE (CVE-2026-48019). Meme arbitrage.",
+                "PKSA-m5cs-t1y6-qpcs": "Confusion de chemin sur les URL signees temporaires. Corrigee a partir de Laravel 12.61.1, donc inatteignable en 11.x. Ce projet n'expose aucune URL signee temporaire : aucune route n'utilise Route::signed ni URL::temporarySignedRoute."
+            },
+            "abandoned": "report"
         }
     },
     "minimum-stability": "stable",
