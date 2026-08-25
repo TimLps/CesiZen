@@ -1,0 +1,22 @@
+# Environnement de production.
+# Code figé DANS l'image (aucun montage), debug désactivé,
+# base non exposée à l'extérieur, redémarrage automatique.
+
+services:
+  app:
+    build:
+      target: prod
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      LOG_LEVEL: error
+
+  web:
+    restart: unless-stopped
+    ports:
+      - "80:80"
+
+  db:
+    restart: unless-stopped
+    # Aucune section "ports" : la base n'est joignable que par le réseau interne.
