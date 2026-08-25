@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -18,9 +19,34 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
         ]);
 
-        // Sanctum: stateful API guard for SPA back-office
-        $middleware->statefulApi();
+        // L'authentification par session n'est pas activée : aucun client ne
+        // s'en sert. L'application mobile et le back-office envoient tous deux
+        // un jeton dans l'en-tête Authorization — ni CSRF, ni cookie, ni appel
+        // à /sanctum/csrf-cookie n'apparaît dans leur code. Activer
+        // statefulApi() ouvrirait l'authentification par cookie de session aux
+        // domaines déclarés, et avec elle une surface CSRF, sans contrepartie.
+
+        // CESIZen n'expose aucune page de connexion : c'est une API, ses
+        // clients sont l'application Flutter et le back-office. Sans cette
+        // ligne, le middleware d'authentification construit son exception en
+        // appelant route('login'), route qui n'existe pas : Laravel lève
+        // RouteNotFoundException et répond 500 au lieu de 401. La redirection
+        // pour visiteur anonyme est donc désactivée, ce qui laisse le
+        // gestionnaire d'exceptions produire la réponse 401 attendue.
+        $middleware->redirectGuestsTo(fn () => null);
+
+        // Applique le limiteur "api" à toutes les routes du groupe.
+        $middleware->throttleApi();
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Sans cela, une requête non authentifiée qui n'annonce pas
+        // Accept: application/json déclenche une redirection vers une route
+        // nommée "login", absente d'une application purement API : Laravel
+        // lève alors RouteNotFoundException et répond 500 au lieu de 401.
+        // La réponse 500 est doublement problématique : elle masque le
+        // contrôle d'accès, et en environnement de développement elle expose
+        // la trace d'exécution complète, chemins de fichiers compris.
+        $exceptions->shouldRenderJsonWhen(
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson()
+        );
     })->create();

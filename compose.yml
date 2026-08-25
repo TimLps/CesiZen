@@ -1,0 +1,64 @@
+# Socle commun aux deux environnements.
+# Ne jamais lancer seul : toujours avec compose.dev.yml OU compose.prod.yml.
+#   dev  : docker compose -f compose.yml -f compose.dev.yml  up -d --build
+#   prod : docker compose -f compose.yml -f compose.prod.yml up -d --build
+
+name: cesizen
+
+services:
+  # PHP-FPM : exécute l'API Laravel.
+  app:
+    build:
+      context: ./api
+      dockerfile: docker/php/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_NAME: CESIZen
+      APP_KEY: ${APP_KEY}
+      APP_TIMEZONE: Europe/Paris
+      APP_LOCALE: fr
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
+      # En production, l'image ne contient pas de fichier .env : sans cette
+      # variable, l5-swagger cherche une spécification qui n'a jamais été
+      # engendrée et /api/documentation répond en erreur.
+      L5_SWAGGER_GENERATE_ALWAYS: "true"
+    networks: [cesizen]
+
+  # Nginx : sert les fichiers statiques et transmet le PHP à php-fpm.
+  web:
+    build:
+      context: ./api
+      dockerfile: docker/nginx/Dockerfile
+    depends_on: [app]
+    networks: [cesizen]
+
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [cesizen]
+
+volumes:
+  dbdata:
+
+networks:
+  cesizen:

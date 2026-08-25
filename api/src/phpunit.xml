@@ -12,6 +12,18 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
+    <!--
+        La couverture est mesurée sur app/ uniquement, et sonar-project.properties
+        exclut les mêmes chemins de sa mesure. Les deux outils s'accordent donc sur
+        le périmètre : sans cela, SonarQube compte comme non couvert ce que PHPUnit
+        ne mesure pas.
+
+        routes/, database/ et config/ en sont écartés parce que l'instrumentation
+        n'y rapporte rien d'exploitable : ces fichiers sont chargés à l'amorçage du
+        framework et pcov leur attribue zéro ligne exécutée même lorsqu'ils le sont
+        — RoleSeeder, appelé par chaque test, y ressortait à 0 %. Ils restent
+        analysés par SonarQube pour la recherche de défauts.
+    -->
     <source>
         <include>
             <directory>app</directory>
@@ -22,8 +34,15 @@
         <env name="APP_KEY" value="base64:dGVzdGluZ19rZXlfZm9yX3VuaXRfdGVzdHNfb25seQ=="/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
+        <!-- Les tests s'exécutent sur le même moteur que la production (MariaDB).
+             SQLite, non typé, acceptait des valeurs qu'une colonne DATE tronque
+             en base réelle : la suite validait un comportement que la production
+             n'a pas. Les identifiants ne sont pas versionnés ici : ils viennent
+             de .env.testing en local et des variables du job en intégration. -->
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_HOST" value="127.0.0.1"/>
+        <env name="DB_PORT" value="3306"/>
+        <env name="DB_DATABASE" value="cesizen_test"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

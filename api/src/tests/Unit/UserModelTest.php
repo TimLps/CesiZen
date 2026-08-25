@@ -16,6 +16,9 @@ class UserModelTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** Mot de passe des comptes créés par ces tests — voir AuthTest. */
+    private const MOT_DE_PASSE = 'MotDePasse2026!';
+
     public function test_admin_helper_returns_true_when_user_has_admin_role(): void
     {
         $adminRole  = Role::create(['name' => Role::ADMIN, 'label' => 'Administrateur']);
@@ -25,7 +28,7 @@ class UserModelTest extends TestCase
             'first_name'    => 'Alice',
             'last_name'     => 'Admin',
             'email'         => 'alice@cesizen.fr',
-            'password'      => 'password',
+            'password'      => self::MOT_DE_PASSE,
             'id_role'       => $adminRole->id_role,
             'id_user_state' => $activeState->id_user_state,
         ])->load(['role', 'userState']);
@@ -44,7 +47,7 @@ class UserModelTest extends TestCase
             'first_name'    => 'Jean',
             'last_name'     => 'Dupont',
             'email'         => 'jean@cesizen.fr',
-            'password'      => 'password',
+            'password'      => self::MOT_DE_PASSE,
             'id_role'       => $role->id_role,
             'id_user_state' => $state->id_user_state,
         ]);
@@ -61,7 +64,7 @@ class UserModelTest extends TestCase
             'first_name'    => 'Bob',
             'last_name'     => 'Banni',
             'email'         => 'bob@cesizen.fr',
-            'password'      => 'password',
+            'password'      => self::MOT_DE_PASSE,
             'id_role'       => $role->id_role,
             'id_user_state' => $inactive->id_user_state,
         ])->load('userState');

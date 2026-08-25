@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.testing.example
 *.pem
 *.key
 storage/*.key
@@ -9,13 +10,9 @@ storage/*.key
 # ---------- PHP / Laravel ----------
 /vendor/
 **/vendor/
-/storage/*.key
-**/storage/framework/cache/*
-**/storage/framework/sessions/*
-**/storage/framework/views/*
-**/storage/logs/*
-**/bootstrap/cache/*
-!**/bootstrap/cache/.gitignore
+**/storage/*.key
+# Les dossiers storage/ et bootstrap/cache portent chacun leur propre .gitignore
+# (convention Laravel) : le squelette est versionné, son contenu ne l'est pas.
 /public/hot
 /public/storage
 .phpunit.result.cache
