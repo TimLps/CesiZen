@@ -64,7 +64,7 @@ docker compose -f compose.yml -f compose.dev.yml up -d
 docker compose -f compose.yml -f compose.dev.yml exec app php artisan migrate --seed
 ```
 
-API sur <http://localhost:8000>, Swagger sur `/api/documentation`.
+API sur <http://localhost:8001>, Swagger sur `/api/documentation`.
 Base joignable depuis un client SQL local sur le port `3307`.
 
 ### API — environnement de production
@@ -88,9 +88,13 @@ API sur <http://localhost>. La base n'est pas exposée à l'extérieur.
 
 ### Applications Flutter
 
+Le back-office doit démarrer sur le port 3000 : c'est l'origine déclarée
+dans `config/cors.php`. Sans `--web-port`, Flutter en choisit un au hasard
+et le navigateur bloquera les appels à l'API.
+
 ```bash
-cd mobile     && flutter pub get && flutter run              # mobile
-cd backoffice && flutter pub get && flutter run -d chrome    # back-office
+cd mobile     && flutter pub get && flutter run                             # mobile
+cd backoffice && flutter pub get && flutter run -d chrome --web-port=3000   # back-office
 ```
 
 Comptes seedés : `admin@cesizen.fr` (administrateur) et `demo@cesizen.fr`
