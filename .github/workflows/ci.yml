@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  tests:
+    name: Tests et analyse SonarQube
+    runs-on: ubuntu-latest
+
+    # Les tests s'exécutent sur le même moteur que la production.
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: cesizen_test
+          MARIADB_USER: cesizen
+          MARIADB_PASSWORD: cesizen
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    defaults:
+      run:
+        working-directory: ./api/src   # Laravel n'est pas à la racine du dépôt
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # SonarQube a besoin de l'historique complet
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_mysql, bcmath, intl, zip, gd
+          coverage: pcov
+
+      - name: Installer les dépendances
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      # Identifiants de la base de test uniquement : éphémères, ils ne
+      # donnent accès qu'au conteneur MariaDB de ce job.
+      - name: Renseigner les identifiants de la base de test
+        run: printf 'DB_USERNAME=cesizen\nDB_PASSWORD=cesizen\n' > .env.testing
+
+      - name: Exécuter les tests
+        run: php artisan test --coverage-clover=coverage.xml
+
+      # Échoue si une dépendance porte une vulnérabilité connue.
+      - name: Auditer les dépendances
+        run: composer audit
+
+      - name: Analyse SonarQube Cloud
+        uses: SonarSource/sonarqube-scan-action@v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  docker-build:
+    name: Build de la stack de production
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v7
+
+      # compose interpole des variables même pour un simple build.
+      - name: Préparer les variables de compose
+        run: cp .env.example .env
+
+      - name: Builder les images de production
+        run: docker compose -f compose.yml -f compose.prod.yml build
