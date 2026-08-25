@@ -13,14 +13,19 @@ return [
     | Origin et n'est donc pas soumise à la politique CORS — la restreindre
     | ici ne l'empêche pas de fonctionner.
     |
-    | Le back-office Flutter Web doit être lancé sur un port fixe :
-    |     flutter run -d chrome --web-port=3000
-    | Sans --web-port, Flutter choisit un port au hasard à chaque démarrage,
-    | qui ne correspondra à aucune des origines déclarées ci-dessous.
+    | Deux applications web, donc deux ports fixes : le back-office sur 3000,
+    | l'application mobile lancée sur Chrome sur 3001. Elles doivent démarrer
+    | avec --web-port, sans quoi Flutter choisit un port au hasard à chaque
+    | lancement, qui ne correspondra à aucune origine déclarée ici.
+    |
+    |     cd backoffice && flutter run -d chrome --web-port=3000
+    |     cd mobile     && flutter run -d chrome --web-port=3001
     */
     'allowed_origins' => [
         'http://localhost:3000',
         'http://127.0.0.1:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001',
     ],
 
     'allowed_origins_patterns' => [],
