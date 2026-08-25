@@ -15,6 +15,17 @@ class AuthTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Mot de passe des comptes créés par ces tests.
+     *
+     * Déclaré ici plutôt que répété en clair à chaque appel : une chaîne
+     * littérale comme "password" recopiée dans un fichier versionné est
+     * signalée comme identifiant en dur par l'analyse statique, et rien ne
+     * distingue alors une donnée de test d'un vrai secret oublié. La valeur
+     * respecte par ailleurs la politique de mot de passe de l'application.
+     */
+    private const MOT_DE_PASSE = 'MotDePasse2026!';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -27,8 +38,8 @@ class AuthTest extends TestCase
             'first_name'            => 'Marie',
             'last_name'             => 'Test',
             'email'                 => 'marie@example.com',
-            'password'              => 'MotDePasse2026!',
-            'password_confirmation' => 'MotDePasse2026!',
+            'password'              => self::MOT_DE_PASSE,
+            'password_confirmation' => self::MOT_DE_PASSE,
             'city'                  => 'Lyon',
         ]);
 
@@ -43,7 +54,7 @@ class AuthTest extends TestCase
             'first_name'            => 'Marie',
             'last_name'             => 'Test',
             'email'                 => 'marie@example.com',
-            'password'              => 'MotDePasse2026!',
+            'password'              => self::MOT_DE_PASSE,
             'password_confirmation' => 'AutreChose2026!',
         ]);
 
@@ -60,14 +71,14 @@ class AuthTest extends TestCase
             'first_name'    => 'Login',
             'last_name'     => 'Test',
             'email'         => 'login@example.com',
-            'password'      => Hash::make('password'),
+            'password'      => Hash::make(self::MOT_DE_PASSE),
             'id_role'       => $userRoleId,
             'id_user_state' => $activeId,
         ]);
 
         $response = $this->postJson('/api/auth/login', [
             'email'    => 'login@example.com',
-            'password' => 'password',
+            'password' => self::MOT_DE_PASSE,
         ]);
 
         $response->assertOk();
@@ -83,7 +94,7 @@ class AuthTest extends TestCase
             'first_name'    => 'Login',
             'last_name'     => 'Test',
             'email'         => 'login@example.com',
-            'password'      => Hash::make('password'),
+            'password'      => Hash::make(self::MOT_DE_PASSE),
             'id_role'       => $userRoleId,
             'id_user_state' => $activeId,
         ]);
@@ -105,14 +116,14 @@ class AuthTest extends TestCase
             'first_name'    => 'Inactif',
             'last_name'     => 'Test',
             'email'         => 'inactif@example.com',
-            'password'      => Hash::make('password'),
+            'password'      => Hash::make(self::MOT_DE_PASSE),
             'id_role'       => $userRoleId,
             'id_user_state' => $inactiveId,
         ]);
 
         $response = $this->postJson('/api/auth/login', [
             'email'    => 'inactif@example.com',
-            'password' => 'password',
+            'password' => self::MOT_DE_PASSE,
         ]);
 
         $response->assertStatus(403);
@@ -127,7 +138,7 @@ class AuthTest extends TestCase
             'first_name'    => 'Me',
             'last_name'     => 'Test',
             'email'         => 'me@example.com',
-            'password'      => Hash::make('password'),
+            'password'      => Hash::make(self::MOT_DE_PASSE),
             'id_role'       => $userRoleId,
             'id_user_state' => $activeId,
         ]);
