@@ -7,7 +7,13 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8001/api"
+      "value": "http://localhost:8001/api",
+      "description": "Stack de développement (port 8001), qui correspond aussi à l'adresse codée dans les deux applications Flutter. Pour la production, remplacer par la valeur de baseUrlProd."
+    },
+    {
+      "key": "baseUrlProd",
+      "value": "http://localhost/api",
+      "description": "Adresse de la stack de production. Pour démontrer sur la production, copier cette valeur dans baseUrl. La valeur par défaut de baseUrl vise la stack de développement, sur le port 8001."
     },
     {
       "key": "adminEmail",
