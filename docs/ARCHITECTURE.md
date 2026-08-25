@@ -55,9 +55,15 @@ communiquent uniquement par HTTP+JSON :
 
 **Ports utilisés** (dev) :
 - API : `localhost:8001`
-- phpMyAdmin : `localhost:8081`
-- Backoffice Web : `localhost:5050`
-- Mobile : se connecte à `localhost:8001` (iOS/Web) ou `10.0.2.2:8001` (Android Emu)
+- Base de données : `localhost:3307` (client SQL local ; aucune interface
+  d'administration web n'est exposée par la stack)
+- Back-office web : `localhost:3000`
+- Mobile sur navigateur : `localhost:3001`
+- Mobile natif : se connecte à `localhost:8001` (iOS) ou `10.0.2.2:8001`
+  (émulateur Android)
+
+Les ports `3000` et `3001` sont imposés par la politique CORS de l'API,
+qui les déclare comme seules origines autorisées.
 
 ---
 

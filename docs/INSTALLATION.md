@@ -135,7 +135,7 @@ le noter à ce moment-là.
 ### Lancer les tests automatisés
 
 ```bash
-docker exec -it cesizen_app php artisan test
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan test
 ```
 
 Sortie attendue : tous les tests verts (PASS).
@@ -264,10 +264,13 @@ Une fois la stack complète démarrée :
 ### Arrêter Docker
 
 ```bash
-cd cesizen/api
+cd cesizen
 docker compose down            # Arrête les conteneurs (préserve les données)
 docker compose down -v         # Arrête ET supprime le volume BDD (reset complet)
 ```
+
+`down` n'a pas besoin des fichiers de surcharge : `compose.yml` suffit à
+identifier le projet, et il est découvert automatiquement à la racine.
 
 ### Nettoyer Flutter
 
@@ -283,9 +286,9 @@ flutter pub get
 ### L'API renvoie une erreur 500
 
 ```bash
-docker exec -it cesizen_app php artisan migrate:fresh --seed
-docker exec -it cesizen_app php artisan config:clear
-docker exec -it cesizen_app php artisan cache:clear
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan migrate:fresh --seed
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan config:clear
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan cache:clear
 ```
 
 ### L'app mobile ne se connecte pas à l'API
@@ -306,19 +309,19 @@ flutter run
 
 Le conteneur MariaDB met quelques secondes à s'initialiser. `compose.yml`
 déclare une sonde de santé et le service `app` attend qu'elle passe au
-vert, mais un client SQL lancé immédiatement après `docker compose up`
+vert, mais un client SQL lancé immédiatement après le démarrage
 peut arriver trop tôt. Attendre une dizaine de secondes.
 
 ### Réinitialiser complètement
 
 ```bash
-cd cesizen/api
+cd cesizen
 docker compose down -v
-docker compose up -d --build
-docker exec -it cesizen_app composer install
-docker exec -it cesizen_app php artisan key:generate
-docker exec -it cesizen_app php artisan migrate --seed
-docker exec -it cesizen_app php artisan l5-swagger:generate
+docker compose -f compose.yml -f compose.dev.yml up -d --build
+docker compose -f compose.yml -f compose.dev.yml exec app composer install
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan key:generate --show
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan migrate --seed
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan l5-swagger:generate
 ```
 
 ---
