@@ -22,7 +22,11 @@ Route::get('/health', fn () => response()->json([
 ]));
 
 // ── Authentification publique ─────────────────────────────────────────────────
-Route::prefix('auth')->group(function () {
+// Limitées à 5 requêtes par minute et par IP (limiteur "auth", défini dans
+// AppServiceProvider). Ce sont les seules routes d'écriture accessibles sans
+// jeton : force brute sur /login, énumération de comptes sur /register,
+// envoi massif de courriels sur /forgot-password.
+Route::middleware('throttle:auth')->prefix('auth')->group(function () {
     Route::post('/register',        [AuthController::class, 'register']);
     Route::post('/login',           [AuthController::class, 'login']);
     Route::post('/forgot-password', [PasswordController::class, 'forgotPassword']);

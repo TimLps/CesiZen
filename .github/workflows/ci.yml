@@ -51,7 +51,7 @@ jobs:
         run: printf 'DB_USERNAME=cesizen\nDB_PASSWORD=cesizen\n' > .env.testing
 
       - name: Exécuter les tests
-        run: php artisan test --coverage-clover=coverage.xml
+        run: php artisan test --coverage --coverage-clover=coverage.xml
 
       # Échoue si une dépendance porte une vulnérabilité connue.
       - name: Auditer les dépendances

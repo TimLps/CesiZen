@@ -9,6 +9,7 @@ use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use OpenApi\Attributes as OA;
 
@@ -82,12 +83,11 @@ class ProfileController extends Controller
     {
         $data = $request->validate([
             'current_password'          => ['required', 'string'],
-            'new_password'              => ['required', 'string', 'min:8', 'confirmed', 'different:current_password'],
+            'new_password'              => ['required', 'string', Password::defaults(), 'confirmed', 'different:current_password'],
             'new_password_confirmation' => ['required', 'string'],
         ], [
             'new_password.confirmed' => 'La confirmation du nouveau mot de passe ne correspond pas.',
             'new_password.different' => 'Le nouveau mot de passe doit être différent de l\'actuel.',
-            'new_password.min'       => 'Le nouveau mot de passe doit comporter au moins 8 caractères.',
         ]);
 
         $user = $request->user();

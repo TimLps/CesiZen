@@ -17,7 +17,10 @@ services:
     volumes:
       - ./api/src:/var/www/html
     ports:
-      - "8000:80"
+      # 8001 et non 8000 : c'est le port sur lequel pointent les deux clients
+      # Flutter (backoffice/lib/core/network/api_client.dart et son équivalent
+      # mobile). Le changer imposerait de modifier les deux applications.
+      - "8001:80"
 
   db:
     ports:
