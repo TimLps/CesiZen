@@ -6,6 +6,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,6 +18,25 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiting();
+        $this->configurePasswordPolicy();
+    }
+
+    /**
+     * Politique de mot de passe, appliquée partout via Password::defaults() :
+     * inscription, réinitialisation, changement depuis le profil, et création
+     * ou modification d'un compte par un administrateur.
+     *
+     * Définie ici plutôt que répétée dans chaque FormRequest : la règle
+     * n'existe qu'à un seul endroit, et une évolution s'applique d'office à
+     * tous les points d'entrée. Elle était auparavant écrite six fois, ce qui
+     * garantissait qu'un durcissement en oublierait au moins un.
+     */
+    private function configurePasswordPolicy(): void
+    {
+        Password::defaults(fn () => Password::min(12)
+            ->mixedCase()
+            ->numbers()
+            ->symbols());
     }
 
     /**

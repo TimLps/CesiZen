@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Profile;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
 
 class UpdateProfileRequest extends FormRequest
@@ -22,7 +23,7 @@ class UpdateProfileRequest extends FormRequest
             'email'      => ['sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId, 'id_user')],
             'city'       => ['nullable', 'string', 'max:100'],
             'birth_date' => ['nullable', 'date', 'before:today'],
-            'password'   => ['sometimes', 'string', 'min:8', 'confirmed'],
+            'password'   => ['sometimes', 'string', Password::defaults(), 'confirmed'],
         ];
     }
 }

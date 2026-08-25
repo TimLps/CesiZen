@@ -27,8 +27,8 @@ class AuthTest extends TestCase
             'first_name'            => 'Marie',
             'last_name'             => 'Test',
             'email'                 => 'marie@example.com',
-            'password'              => 'password123',
-            'password_confirmation' => 'password123',
+            'password'              => 'MotDePasse2026!',
+            'password_confirmation' => 'MotDePasse2026!',
             'city'                  => 'Lyon',
         ]);
 
@@ -43,8 +43,8 @@ class AuthTest extends TestCase
             'first_name'            => 'Marie',
             'last_name'             => 'Test',
             'email'                 => 'marie@example.com',
-            'password'              => 'password123',
-            'password_confirmation' => 'autrechose',
+            'password'              => 'MotDePasse2026!',
+            'password_confirmation' => 'AutreChose2026!',
         ]);
 
         $response->assertStatus(422);

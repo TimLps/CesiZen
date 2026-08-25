@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class RegisterRequest extends FormRequest
             'first_name' => ['required', 'string', 'max:50'],
             'last_name'  => ['required', 'string', 'max:50'],
             'email'      => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password'   => ['required', 'string', 'min:8', 'confirmed'],
+            'password'   => ['required', 'string', Password::defaults(), 'confirmed'],
             'city'       => ['nullable', 'string', 'max:100'],
             'birth_date' => ['nullable', 'date', 'before:today'],
         ];
@@ -27,7 +28,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'email.unique'     => 'Cet email est déjà utilisé.',
-            'password.min'     => 'Le mot de passe doit contenir au moins 8 caractères.',
+            'password.min'     => 'Le mot de passe doit contenir au moins 12 caractères.',
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
             'birth_date.before' => 'La date de naissance doit être antérieure à aujourd\'hui.',
         ];
