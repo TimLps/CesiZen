@@ -1,56 +1,80 @@
-# CESIZen
+# CESIZen — Projet d'évaluation CDA
 
-Application de gestion du stress et de suivi des émotions.
-API REST **Laravel 11** (authentification **Sanctum**), application mobile **Flutter**,
-back-office d'administration **Flutter Web**.
+Application de **santé mentale grand public** réalisée dans le cadre du titre **Concepteur Développeur d'Applications**.
 
-## Arborescence
+> CESIZen propose à ses utilisateurs un espace pour mieux comprendre leur santé mentale, suivre leurs émotions au quotidien et apprendre à gérer leur stress via des exercices guidés de cohérence cardiaque.
 
-| Dossier | Contenu |
+---
+
+## Sous-projets
+
+| Dossier | Stack | Rôle |
+|---|---|---|
+| **`api/`** | Laravel 11 + MariaDB + Sanctum + Swagger | API REST exposant toute la logique métier |
+| **`mobile/`** | Flutter (Riverpod + GoRouter + Dio) | Application mobile Android / iOS pour les utilisateurs |
+| **`backoffice/`** | Flutter Web (même stack) | Interface d'administration desktop |
+
+Chaque sous-projet possède son propre `README.md` détaillé.
+
+---
+
+## Modules réalisés
+
+Conformément au cahier des charges du sujet CESIZen :
+
+| Module | Type CDA | Statut |
+|---|---|---|
+| Gestion des comptes utilisateurs (RGPD inclus) | **Obligatoire** | ✅ Implémenté |
+| Pages d'information sur la santé mentale | **Obligatoire** | ✅ Implémenté |
+| Tracker d'émotions (journal + rapport agrégé, hiérarchie niveau 1/2) | **Au choix** | ✅ Implémenté |
+
+---
+
+## Documents fournis
+
+Dans le dossier `docs/` :
+
+| Fichier | Description |
 |---|---|
-| `api/` | API REST Laravel 11. Le code applicatif est dans `api/src`, l'outillage Docker dans `api/docker`. |
-| `mobile/` | Application Flutter (Android / iOS). |
-| `backoffice/` | Application Flutter Web d'administration. |
-| `docs/` | Architecture, installation, RGAA, cahier de tests. |
+| **`INSTALLATION.md`** | Guide d'installation pas à pas des 3 sous-projets |
+| **`CESIZen_Choix_Techniques.pdf`** | Comparatif d'architectures + justification du choix Laravel + Flutter |
+| **`CESIZen_Cahier_de_Tests.pdf`** | Stratégie de test, scénarios unitaires/fonctionnels/recette + PV de recette |
 
-## Prérequis
-
-Docker et le plugin Docker Compose. Rien d'autre : PHP, Composer et MariaDB
-tournent dans les conteneurs.
+---
 
 ## Démarrage
 
-La stack se compose d'un fichier de base et d'un override par environnement.
-`compose.yml` ne se lance jamais seul.
+La stack Docker se compose d'un fichier de base et d'un override par
+environnement. `compose.yml` ne se lance jamais seul.
 
 ```bash
-cp .env.example .env          # puis renseigner les mots de passe
+cp .env.example .env    # variables consommées par docker compose
 ```
 
-### Développement
-
-Code monté depuis l'hôte (modification sans rebuild), `APP_DEBUG` actif,
-base de données joignable depuis un client SQL local sur le port `3307`.
+### API — environnement de développement
 
 ```bash
 docker compose -f compose.yml -f compose.dev.yml up -d --build
-docker compose -f compose.yml -f compose.dev.yml exec app php artisan key:generate
+docker compose -f compose.yml -f compose.dev.yml exec app composer install
+
+# Générer la clé applicative, puis la reporter dans APP_KEY du .env racine :
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan key:generate --show
+docker compose -f compose.yml -f compose.dev.yml up -d
+
 docker compose -f compose.yml -f compose.dev.yml exec app php artisan migrate --seed
 ```
 
-API disponible sur <http://localhost:8000>. Vérification : <http://localhost:8000/api/health>.
+API sur <http://localhost:8000>, Swagger sur `/api/documentation`.
+Base joignable depuis un client SQL local sur le port `3307`.
 
-### Production
-
-Code figé dans l'image, `APP_DEBUG` désactivé, dépendances de développement
-absentes, base non exposée à l'extérieur, redémarrage automatique des conteneurs.
+### API — environnement de production
 
 ```bash
 docker compose -f compose.yml -f compose.prod.yml up -d --build
 docker compose -f compose.yml -f compose.prod.yml exec app php artisan migrate --force
 ```
 
-API disponible sur <http://localhost>.
+API sur <http://localhost>. La base n'est pas exposée à l'extérieur.
 
 ### Différences entre les deux environnements
 
@@ -62,6 +86,19 @@ API disponible sur <http://localhost>.
 | Port de la base | `3307` exposé sur l'hôte | aucun, réseau interne uniquement |
 | Redémarrage | manuel | `unless-stopped` |
 
+### Applications Flutter
+
+```bash
+cd mobile     && flutter pub get && flutter run              # mobile
+cd backoffice && flutter pub get && flutter run -d chrome    # back-office
+```
+
+Comptes seedés :
+- `admin@cesizen.fr` / `password` (admin)
+- `demo@cesizen.fr` / `password` (utilisateur)
+
+---
+
 ## Tests
 
 ```bash
@@ -71,10 +108,10 @@ docker compose -f compose.yml -f compose.dev.yml exec app php artisan test
 Les tests s'exécutent sur **MariaDB**, le même moteur qu'en production, avec
 `RefreshDatabase` : les migrations sont rejouées à chaque test, sans effet de
 bord. Les identifiants de la base de test viennent de `api/src/.env.testing`
-(non versionné, un exemple est fourni).
+(non versionné, un exemple est fourni dans `api/src/.env.testing.example`).
 
-## Documentation de l'API
+---
 
-La spécification OpenAPI est générée par `l5-swagger` à partir des attributs PHP
-des contrôleurs, et exposée sur `/api/documentation` en environnement de
-développement.
+## Auteur
+
+**Tim LOPES** — promotion CDA, mai 2026.
