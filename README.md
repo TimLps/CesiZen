@@ -93,9 +93,11 @@ cd mobile     && flutter pub get && flutter run              # mobile
 cd backoffice && flutter pub get && flutter run -d chrome    # back-office
 ```
 
-Comptes seedés :
-- `admin@cesizen.fr` / `password` (admin)
-- `demo@cesizen.fr` / `password` (utilisateur)
+Comptes seedés : `admin@cesizen.fr` (administrateur) et `demo@cesizen.fr`
+(utilisateur). Leurs mots de passe proviennent de `SEED_ADMIN_PASSWORD` et
+`SEED_DEMO_PASSWORD`, à renseigner dans le `.env`. Si ces variables sont
+vides, le seeder engendre un mot de passe aléatoire et l'affiche une seule
+fois dans sa sortie.
 
 ---
 
