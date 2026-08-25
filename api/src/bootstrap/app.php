@@ -30,6 +30,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // pour visiteur anonyme est donc désactivée, ce qui laisse le
         // gestionnaire d'exceptions produire la réponse 401 attendue.
         $middleware->redirectGuestsTo(fn () => null);
+
+        // Applique le limiteur "api" à toutes les routes du groupe.
+        $middleware->throttleApi();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Sans cela, une requête non authentifiée qui n'annonce pas
