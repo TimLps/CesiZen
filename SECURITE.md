@@ -146,7 +146,35 @@ sur `main` et `develop` :
 - l'analyse **SonarQube Cloud** avec remontée de la couverture ;
 - la construction des images Docker de production.
 
-Les corrections 1, 2 et 5 sont couvertes par des tests automatisés :
+Les corrections 1, 2, 4 et 5 sont couvertes par des tests automatisés :
 réponse 401 sans en-tête `Accept`, réponse 429 à la sixième tentative de
-connexion avec en-tête `Retry-After`, et refus des mots de passe trop
-courts ou incomplets sans création de compte.
+connexion avec en-tête `Retry-After`, refus des mots de passe non conformes
+sur les **six** points d'entrée sans création de compte, et vérification
+que le seeder ne crée plus le compte d'administration avec un mot de passe
+prévisible. La suite est passée de 14 à 32 tests.
+
+### Sur les deux chiffres de couverture
+
+Le tableau de bord affiche deux valeurs très différentes : environ **21 %
+de couverture globale**, et **100 % sur le code nouveau**. Les deux sont
+exactes et ne mesurent pas la même chose.
+
+Le projet a été développé avant que les tests ne deviennent une priorité :
+la majeure partie du code existant n'est pas couverte, et le rattraper
+n'entrait pas dans le périmètre de cette campagne de sécurité. Le quality
+gate applique en revanche le principe *clean as you code* recommandé par
+SonarQube — il n'exige rien du code ancien, mais impose 80 % de couverture
+sur toute ligne ajoutée ou modifiée. La dette existante est donc gelée, et
+tout nouvel apport arrive testé.
+
+Ce seuil a d'ailleurs fait échouer la première version de ces corrections,
+et à juste titre : `SECURITE.md` affirmait que la politique de mot de passe
+s'appliquait aux six points d'entrée, alors qu'un seul était testé. Les
+cinq autres l'ont été à la suite de ce refus.
+
+La mesure porte sur `app/`. `config/`, `database/` et `routes/` en sont
+écartés — non pour améliorer le chiffre, mais parce que l'instrumentation
+pcov n'y rapporte aucune ligne exécutée même lorsqu'ils le sont : les
+seeders appelés par chaque test y figuraient à 0 %. Ces répertoires restent
+analysés par SonarQube pour la recherche de défauts ; seule leur mesure de
+couverture est écartée.
