@@ -120,8 +120,9 @@ lib/
 # Lancer en mode dev avec hot reload
 flutter run
 
-# Lancer sur Chrome (web)
-flutter run -d chrome
+# Lancer sur Chrome (web) — le port est imposé par la politique CORS de
+# l'API : 3001 pour l'application mobile, 3000 étant pris par le back-office
+flutter run -d chrome --web-port=3001
 
 # Build release Android (APK)
 flutter build apk --release

@@ -17,6 +17,9 @@ class EmotionJournalTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** Mot de passe des comptes créés par ces tests — voir AuthTest. */
+    private const MOT_DE_PASSE = 'MotDePasse2026!';
+
     private User $user;
     private Emotion $emotion;
 
@@ -44,7 +47,7 @@ class EmotionJournalTest extends TestCase
             'first_name'    => 'Tim',
             'last_name'     => 'Test',
             'email'         => 'tim@example.com',
-            'password'      => Hash::make('password'),
+            'password'      => Hash::make(self::MOT_DE_PASSE),
             'id_role'       => $userRoleId,
             'id_user_state' => $activeId,
         ]);
@@ -105,7 +108,7 @@ class EmotionJournalTest extends TestCase
             'first_name'    => 'Autre',
             'last_name'     => 'User',
             'email'         => 'autre@example.com',
-            'password'      => Hash::make('password'),
+            'password'      => Hash::make(self::MOT_DE_PASSE),
             'id_role'       => $userRoleId,
             'id_user_state' => $activeId,
         ]);

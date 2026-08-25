@@ -21,6 +21,33 @@ Chaque ligne correspond à un commit unique, cliquable dans l'historique.
 | 5 | Politique de mot de passe insuffisante (`min:8` seul), dupliquée à six endroits | Revue manuelle · OWASP A07 | `AppServiceProvider.php` + 6 points d'entrée | `Password::defaults()` : 12 caractères, majuscule et minuscule, chiffre, symbole | `a038d3c` |
 | 6 | 33 vulnérabilités connues dans les dépendances, dont 8 de sévérité haute | `composer audit` · OWASP A06 | `composer.lock` | Mise à jour dans les bornes de `composer.json` : 30 avis levés | `19c115f` |
 | 7 | 3 avis résiduels non corrigeables sans montée de version majeure | `composer audit` · OWASP A06 | `composer.json` | Déclarés dans `config.audit.ignore` avec justification ; l'audit reste bloquant pour toute nouvelle vulnérabilité | `ab6d56d` |
+| 8 | Authentification par session activée alors qu'aucun client ne l'utilise — surface CSRF gratuite | Revue manuelle · OWASP A01 | `bootstrap/app.php`, `config/sanctum.php` | `statefulApi()` retiré, liste des domaines vidée | `e94460a` |
+| 9 | Identifiants `root / root` d'une console d'administration de base publiés dans la documentation d'un dépôt public | Revue manuelle · OWASP A05 | `api/README.md`, `docs/INSTALLATION.md` | Mentions retirées ; le service concerné avait déjà été supprimé de la stack | `422019e` |
+| 10 | Mots de passe littéraux dans les jeux de données de test | SonarQube S2068 | `tests/` | Remplacés par une constante par classe, conforme à la politique | `12c9ae2` |
+
+### Sur la correction 8 — pourquoi retirer l'authentification par session
+
+Sanctum sait authentifier de deux façons : par jeton porté dans l'en-tête
+`Authorization`, et par cookie de session pour les requêtes venant des
+domaines déclarés dans `SANCTUM_STATEFUL_DOMAINS`. Le second mode était
+activé.
+
+Aucun client ne s'en sert. Ni l'application mobile ni le back-office ne
+contiennent la moindre référence à un cookie, à CSRF, à `withCredentials`,
+ni le moindre appel à `/sanctum/csrf-cookie` : tous deux posent un en-tête
+`Authorization: Bearer` dans leur intercepteur Dio.
+
+La différence a des conséquences. Un cookie de session est joint
+**automatiquement** par le navigateur à toute requête vers le domaine
+concerné, y compris celles déclenchées par un autre site : c'est le
+mécanisme même du CSRF. Un jeton dans un en-tête doit être posé
+explicitement par le code de l'application, un site tiers ne peut pas le
+faire à sa place. Conserver le mode session ouvrait donc cette voie sans
+qu'aucune fonctionnalité n'en dépende.
+
+La liste des domaines déclarés était par ailleurs héritée du modèle de
+départ et contenait `localhost:8081` — le port du service phpMyAdmin retiré
+de la stack. Un domaine qui figure dans cette liste obtient la session.
 
 Deux corrections supplémentaires proviennent de la conteneurisation
 (commit `9660bec`) : les identifiants MariaDB, jusque-là écrits en clair

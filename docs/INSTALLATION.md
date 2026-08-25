@@ -43,43 +43,63 @@ L'API est conteneurisée pour éviter d'avoir à installer PHP, Composer et Mari
 
 ### 2.1. Configuration de l'environnement
 
+Les fichiers `compose` sont à la **racine du dépôt**, et lisent leurs
+variables dans un `.env` situé au même endroit.
+
 ```bash
-cd cesizen/api
-cp src/.env.example src/.env
+cd cesizen
+cp .env.example .env
 ```
 
-Le fichier `.env` est pré-configuré pour Docker (host `db`, port `3306`). Aucune modification n'est requise pour le développement local.
+Renseigner ensuite les mots de passe de la base, puis `SEED_ADMIN_PASSWORD`
+et `SEED_DEMO_PASSWORD` si l'on veut choisir ceux des comptes de
+démonstration.
 
 ### 2.2. Lancement des conteneurs
 
+Un socle commun et un fichier de surcharge par environnement.
+`compose.yml` ne se lance jamais seul.
+
 ```bash
-docker compose up -d --build
+docker compose -f compose.yml -f compose.dev.yml up -d --build
 ```
 
 Trois conteneurs démarrent :
 
 | Conteneur | Rôle | Port hôte |
 |---|---|---|
-| `cesizen_app` | PHP 8.4-FPM + Laravel | 8001 |
-| `cesizen_db` | MariaDB 11 | 3306 |
-| `cesizen_phpmyadmin` | Interface BDD | 8081 |
+| `cesizen-app` | PHP 8.4-FPM + Laravel | — (interne) |
+| `cesizen-web` | Nginx, frontal de php-fpm | 8001 |
+| `cesizen-db` | MariaDB 11 | 3307 |
+
+Aucune interface d'administration de base de données n'est exposée : la
+base se consulte avec un client SQL local sur le port `3307`.
+
+Pour la stack de production, remplacer `compose.dev.yml` par
+`compose.prod.yml`. L'API écoute alors sur le port 80, le débogage est
+désactivé, le code est figé dans l'image et la base n'est plus exposée.
 
 ### 2.3. Installation des dépendances PHP
 
 ```bash
-docker exec -it cesizen_app composer install
+docker compose -f compose.yml -f compose.dev.yml exec app composer install
 ```
 
 ### 2.4. Génération de la clé d'application
 
+La clé est fournie par le `.env` de la racine, que lit `compose`. On la
+génère donc sans l'écrire, puis on la reporte dans `APP_KEY`.
+
 ```bash
-docker exec -it cesizen_app php artisan key:generate
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan key:generate --show
+# coller la valeur dans APP_KEY du .env racine, puis :
+docker compose -f compose.yml -f compose.dev.yml up -d
 ```
 
 ### 2.5. Création du schéma BDD et chargement des données initiales
 
 ```bash
-docker exec -it cesizen_app php artisan migrate --seed
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan migrate --seed
 ```
 
 Cette commande :
@@ -90,28 +110,32 @@ Cette commande :
 ### 2.6. Génération de la documentation Swagger
 
 ```bash
-docker exec -it cesizen_app php artisan l5-swagger:generate
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan l5-swagger:generate
 ```
 
 ### 2.7. Vérification
 
 | URL | Attendu |
 |---|---|
-| http://localhost:8001 | Page Laravel par défaut ou réponse 200 |
+| http://localhost:8001/api/health | `{"status":"ok","service":"CESIZen API"}` |
 | http://localhost:8001/api/documentation | Swagger UI interactif |
-| http://localhost:8081 | phpMyAdmin (login : `root` / `root`) |
 
 ### Comptes pré-créés
 
-| Email | Mot de passe | Rôle |
-|---|---|---|
-| `admin@cesizen.fr` | `password` | Administrateur |
-| `demo@cesizen.fr` | `password` | Utilisateur |
+| Email | Rôle |
+|---|---|
+| `admin@cesizen.fr` | Administrateur |
+| `demo@cesizen.fr` | Utilisateur |
+
+Leurs mots de passe proviennent de `SEED_ADMIN_PASSWORD` et
+`SEED_DEMO_PASSWORD`. Si ces variables sont vides, le seeder engendre un
+mot de passe aléatoire et l'affiche **une seule fois** dans sa sortie —
+le noter à ce moment-là.
 
 ### Lancer les tests automatisés
 
 ```bash
-docker exec -it cesizen_app php artisan test
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan test
 ```
 
 Sortie attendue : tous les tests verts (PASS).
@@ -158,8 +182,13 @@ flutter devices  # iPhone simulator doit apparaître
 #### Option D — Web (pour démo rapide)
 
 ```bash
-flutter run -d chrome
+flutter run -d chrome --web-port=3001
 ```
+
+Le port n'est pas optionnel : `3001` est l'origine déclarée pour
+l'application mobile dans `config/cors.php` — le back-office occupe `3000`.
+Sans `--web-port`, Flutter en choisit un au hasard et le navigateur bloque
+les appels à l'API au titre de la politique CORS.
 
 ### 3.3. Lancement
 
@@ -193,8 +222,12 @@ flutter pub get
 ### 4.3. Lancement
 
 ```bash
-flutter run -d chrome
+flutter run -d chrome --web-port=3000
 ```
+
+Le port 3000 n'est pas optionnel : c'est l'origine déclarée pour le
+back-office dans `config/cors.php`. Sans `--web-port`, Flutter en choisit
+un au hasard et le navigateur bloque les appels à l'API.
 
 Une fenêtre Chrome s'ouvre automatiquement avec hot-reload activé.
 
@@ -216,9 +249,9 @@ Une fois la stack complète démarrée :
 
 | Service | URL | Authentification |
 |---|---|---|
-| API Laravel | http://localhost:8001 | Sanctum (Bearer token) |
+| API Laravel | http://localhost:8001 | Sanctum (jeton Bearer) |
 | Documentation Swagger | http://localhost:8001/api/documentation | — |
-| phpMyAdmin | http://localhost:8081 | `root` / `root` |
+| Base de données | `localhost:3307` | client SQL local |
 | Mobile (web debug) | http://localhost:NNNN | Sanctum |
 | Back-office | http://localhost:NNNN | Sanctum (admin uniquement) |
 
@@ -231,10 +264,13 @@ Une fois la stack complète démarrée :
 ### Arrêter Docker
 
 ```bash
-cd cesizen/api
+cd cesizen
 docker compose down            # Arrête les conteneurs (préserve les données)
 docker compose down -v         # Arrête ET supprime le volume BDD (reset complet)
 ```
+
+`down` n'a pas besoin des fichiers de surcharge : `compose.yml` suffit à
+identifier le projet, et il est découvert automatiquement à la racine.
 
 ### Nettoyer Flutter
 
@@ -250,9 +286,9 @@ flutter pub get
 ### L'API renvoie une erreur 500
 
 ```bash
-docker exec -it cesizen_app php artisan migrate:fresh --seed
-docker exec -it cesizen_app php artisan config:clear
-docker exec -it cesizen_app php artisan cache:clear
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan migrate:fresh --seed
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan config:clear
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan cache:clear
 ```
 
 ### L'app mobile ne se connecte pas à l'API
@@ -269,20 +305,23 @@ flutter pub get
 flutter run
 ```
 
-### phpMyAdmin ne se connecte pas
+### La base n'accepte pas les connexions au démarrage
 
-Le conteneur DB met quelques secondes à initialiser. Attendre 10 secondes après le `docker compose up` avant d'ouvrir phpMyAdmin.
+Le conteneur MariaDB met quelques secondes à s'initialiser. `compose.yml`
+déclare une sonde de santé et le service `app` attend qu'elle passe au
+vert, mais un client SQL lancé immédiatement après le démarrage
+peut arriver trop tôt. Attendre une dizaine de secondes.
 
 ### Réinitialiser complètement
 
 ```bash
-cd cesizen/api
+cd cesizen
 docker compose down -v
-docker compose up -d --build
-docker exec -it cesizen_app composer install
-docker exec -it cesizen_app php artisan key:generate
-docker exec -it cesizen_app php artisan migrate --seed
-docker exec -it cesizen_app php artisan l5-swagger:generate
+docker compose -f compose.yml -f compose.dev.yml up -d --build
+docker compose -f compose.yml -f compose.dev.yml exec app composer install
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan key:generate --show
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan migrate --seed
+docker compose -f compose.yml -f compose.dev.yml exec app php artisan l5-swagger:generate
 ```
 
 ---
@@ -292,7 +331,7 @@ docker exec -it cesizen_app php artisan l5-swagger:generate
 ```
 cesizen/
 ├── api/                        # API Laravel
-│   ├── docker-compose.yml
+│   ├── docker/                (Dockerfile PHP et Nginx)
 │   ├── docker/php/Dockerfile
 │   ├── src/                    # Code source Laravel
 │   └── README.md
