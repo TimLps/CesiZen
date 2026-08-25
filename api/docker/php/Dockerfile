@@ -2,7 +2,7 @@
 # Deux cibles : "dev" (code monté depuis l'hôte) et "prod" (code copié dans l'image).
 
 # ── Socle commun ──────────────────────────────────────────────────────────────
-FROM php:8.3-fpm AS base
+FROM php:8.4-fpm AS base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
