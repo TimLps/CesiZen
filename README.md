@@ -1,6 +1,6 @@
-# CESIZen — Projet d'évaluation CDA Bloc 2
+# CESIZen — Projet d'évaluation CDA
 
-Application de **santé mentale grand public** réalisée dans le cadre du titre **Concepteur Développeur d'Applications** (Bloc 2 — *Développer et tester les applications informatiques*).
+Application de **santé mentale grand public** réalisée dans le cadre du titre **Concepteur Développeur d'Applications**.
 
 > CESIZen propose à ses utilisateurs un espace pour mieux comprendre leur santé mentale, suivre leurs émotions au quotidien et apprendre à gérer leur stress via des exercices guidés de cohérence cardiaque.
 
