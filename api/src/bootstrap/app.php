@@ -19,8 +19,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
         ]);
 
-        // Sanctum: stateful API guard for SPA back-office
-        $middleware->statefulApi();
+        // L'authentification par session n'est pas activée : aucun client ne
+        // s'en sert. L'application mobile et le back-office envoient tous deux
+        // un jeton dans l'en-tête Authorization — ni CSRF, ni cookie, ni appel
+        // à /sanctum/csrf-cookie n'apparaît dans leur code. Activer
+        // statefulApi() ouvrirait l'authentification par cookie de session aux
+        // domaines déclarés, et avec elle une surface CSRF, sans contrepartie.
 
         // CESIZen n'expose aucune page de connexion : c'est une API, ses
         // clients sont l'application Flutter et le back-office. Sans cette

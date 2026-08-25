@@ -2,7 +2,8 @@
 
 return [
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // Pas de 'sanctum/csrf-cookie' : l'authentification par session n'est pas activée.
+    'paths' => ['api/*'],
 
     /*
     | Origines autorisées à appeler l'API depuis un navigateur.

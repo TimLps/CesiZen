@@ -1,13 +1,15 @@
 <?php
 
-use Laravel\Sanctum\Sanctum;
-
 return [
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
-        'localhost,localhost:3000,localhost:8081,localhost:8001,127.0.0.1,127.0.0.1:8001,::1',
-        Sanctum::currentApplicationUrlWithPort(),
-    ))),
+    /*
+    | Domaines pour lesquels Sanctum accepterait une authentification par
+    | cookie de session. La liste est volontairement vide : l'application
+    | n'active pas ce mode (voir bootstrap/app.php). Elle mentionnait
+    | notamment localhost:8081, port d'un service phpMyAdmin retiré de la
+    | stack — un domaine déclaré ici obtient la session, il n'y a donc pas
+    | lieu d'en laisser traîner.
+    */
+    'stateful' => array_filter(explode(',', (string) env('SANCTUM_STATEFUL_DOMAINS', ''))),
 
     'guard' => ['web'],
     'expiration' => null,
